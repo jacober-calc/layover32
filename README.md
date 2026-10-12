@@ -1,3 +1,5 @@
+![Social Media Preview](assets/layover32_social_preview.png)
+
 # LAYOVER Statefile
 
 ## CONTENTS
