@@ -58,7 +58,7 @@ The index rates a layover on two factors, multiplied together:
 
 A score of 100 is a layover of at least 18 minutes centred exactly on mid-shift.
 
-The chart below maps the index across every combination of layover length and position for the example shift in section 7 (12:47 to 20:12, 5 round trips). The three layovers from the examples are marked. A long break early in the shift scores lower than a shorter one near the middle.
+The chart below maps the index across every combination of layover length and position for the example shift in section 7 (08:00 to 16:00, 5 round trips). Three layovers are marked: the two from the examples and an 11-minute break at mid-shift. A long break early in the shift scores lower than a shorter one near the middle.
 
 ![Layover Gainfulness Index map](assets/gainfulness_map.svg)
 
@@ -142,7 +142,7 @@ Each simulated day, a random number decides whether the incoming trip is late:
 
 The actual layover is u = U − ℓ (not less than 0), and the actual midpoint is T + (U + ℓ) ÷ 2. The day is scored with the same index as the paper score, and the length factor is held between 0 and 1. A day is counted as usable when its score is greater than zero, that is, when the actual layover exceeds 3 minutes.
 
-The chart shows the actual layover received over 200,000 simulated days for the 17:19–17:32 layover in section 7.3. On days the trip is not late, the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
+The chart shows the actual layover received over 200,000 simulated days for the 12:51–13:04 layover in section 7.3. On days the trip is not late, the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
 
 ![Simulated layover](assets/simulated_layover.svg)
 
@@ -349,7 +349,7 @@ Results are shown in FIX 6, the display format saved in the Statefile. Simulated
 
 **Scenario:**
 
-A shift runs from 12:47 to 20:12 with 5 round trips. The layover is scheduled from 17:19 to 17:32.
+A shift runs from 08:00 to 16:00 with 5 round trips. The layover is scheduled from 12:51 to 13:04.
 
 **Solution:**
 
@@ -358,48 +358,48 @@ Press: `XEQ L`
 | Prompt | Enter | Description |
 |--------|-------|-------------|
 | R? | 5 | Round trips per shift |
-| S? | 12.47 | Shift start |
-| E? | 20.12 | Shift end |
-| A? | 17.19 | Layover arrival |
-| B? | 17.32 | Layover departure |
+| S? | 8 | Shift start |
+| E? | 16 | Shift end |
+| A? | 12.51 | Layover arrival |
+| B? | 13.04 | Layover departure |
 
 **Results (displayed on screen from top to bottom):**
 
 | Register | Value | Meaning |
 |----------|-------|---------|
-| Y | 0.629213 | Placement Z-Score |
-| X | 54.693795 | Paper score, % |
+| Y | 0.598958 | Placement Z-Score |
+| X | 55.719464 | Paper score, % |
 
 **Interpretation:**
 
-The 13-minute layover earns a length factor of 0.667. Its midpoint is 0.63 round trips after mid-shift, for a placement factor of 0.820. On paper, the layover is worth 54.7% of an ideal break.
+The 13-minute layover earns a length factor of 0.667. Its midpoint is 0.60 round trips after mid-shift, for a placement factor of 0.836. On paper, the layover is worth 55.7% of an ideal break.
 
 ### 7.2 Early Layover
 
 **Scenario:**
 
-On the same shift, a layover is scheduled from 13:12 to 13:35.
+On the same shift, a layover is scheduled from 08:26 to 08:49.
 
 **Solution:**
 
-Press: `XEQ L`, and enter 5, 12.47, 20.12, 13.12, and 13.35 at the prompts.
+Press: `XEQ L`, and enter 5, 8, 16, 8.26, and 8.49 at the prompts.
 
 **Results (displayed on screen from top to bottom):**
 
 | Register | Value | Meaning |
 |----------|-------|---------|
-| Y | -2.089888 | Placement Z-Score |
-| X | 11.261108 | Paper score, % |
+| Y | -2.109375 | Placement Z-Score |
+| X | 10.809644 | Paper score, % |
 
 **Interpretation:**
 
-At 23 minutes the layover earns the full length factor, but it begins only 25 minutes into the shift, and its midpoint falls 2.09 round trips before mid-shift. Despite being the longest break, it scores only 11.3%.
+At 23 minutes the layover earns the full length factor, but it begins only 26 minutes into the shift, and its midpoint falls 2.11 round trips before mid-shift. Despite being the longest break, it scores only 10.8%.
 
 ### 7.3 Paper vs Simulated
 
 **Scenario:**
 
-The statistics registers hold 200 recorded arrivals: n = 200, Σx = 292, Σy = 100, Σx² = 3939, Σy² = 100, Σxy = −176.5. Half the arrivals were late, by an average of 4.69 minutes; the rest averaged 1.77 minutes early. Assess the 17:19 layover over 10,000 simulated days.
+The statistics registers hold 200 recorded arrivals: n = 200, Σx = 292, Σy = 100, Σx² = 3939, Σy² = 100, Σxy = −176.5. Half the arrivals were late, by an average of 4.69 minutes; the rest averaged 1.77 minutes early. Assess the 12:51 layover over 10,000 simulated days.
 
 **Solution:**
 
@@ -408,13 +408,13 @@ Press: `XEQ A`
 | Prompt | Enter | Description |
 |--------|-------|-------------|
 | R? | 5 | Round trips per shift |
-| S? | 12.47 | Shift start |
-| E? | 20.12 | Shift end |
-| A? | 17.19 | Layover arrival |
-| B? | 17.32 | Layover departure |
+| S? | 8 | Shift start |
+| E? | 16 | Shift end |
+| A? | 12.51 | Layover arrival |
+| B? | 13.04 | Layover departure |
 | N? | 10000 | Simulated days |
 
-The display shows `Z=0.629213`. Press `R/S`.
+The display shows `Z=0.598958`. Press `R/S`.
 
 **Results (displayed on screen from top to bottom):**
 
@@ -422,12 +422,12 @@ The display shows `Z=0.629213`. Press `R/S`.
 |----------|-------|---------|
 | T | ≈ 11.6 | Average actual layover, minutes |
 | Z | ≈ 96.3 | Usable share, % |
-| Y | ≈ 47.3 | Expected score, % |
-| X | 54.693795 | Paper score, % |
+| Y | ≈ 48.2 | Expected score, % |
+| X | 55.719464 | Paper score, % |
 
 **Interpretation:**
 
-The layover promises 54.7 on paper but delivers about 47.3 on average, a deficit of about 7.3 points. The scheduled 13 minutes averages about 11.6 minutes in practice, and on about 4% of days there is no usable break.
+The layover promises 55.7 on paper but delivers about 48.2 on average, a deficit of about 7.5 points. The scheduled 13 minutes averages about 11.6 minutes in practice, and on about 4% of days there is no usable break.
 
 ### 7.4 Lateness Summary
 
@@ -479,7 +479,7 @@ Half of the 200 recorded arrivals were on time or early. Late arrivals averaged 
 
 ### 8.3 Important Notes
 
-- Times are entered in H.MM format (17.19 = 17:19); shifts that cross midnight are not supported
+- Times are entered in H.MM format (12.51 = 12:51); shifts that cross midnight are not supported
 - The dataset must contain at least one late and one non-late arrival, or the simulation stops with a divide-by-zero error
 - Use data for the specific trip arriving at the layover; a dataset that mixes all trips gives an optimistic result for a layover after a trip that often runs late
 - Use `SEED` before running to repeat a simulation exactly
