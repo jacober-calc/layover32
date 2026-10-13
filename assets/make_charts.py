@@ -23,9 +23,9 @@ def save(fig,name):
 # 1 Length factor
 fig,ax=plt.subplots(figsize=(8,4.2))
 m=np.linspace(0,25,501); ax.plot(m,Lam(m),color=BLUE,lw=2.6)
-ax.axvspan(0,3,color=GREY,alpha=.15); ax.text(1.5,.55,"Boarding\n(no\nvalue)",ha="center",va="center",fontsize=9.5,color=GREY)
+ax.axvspan(0,3,color=GREY,alpha=.15); ax.text(1.5,.55,"3 min\nloading\nbefore\ndeparture",ha="center",va="center",fontsize=9,color=GREY)
 ax.axvline(18,color=GREY,ls=":",lw=1)
-ax.annotate("Full value at 18 min\n(15 usable minutes)",xy=(18,1),xytext=(18.6,.62),fontsize=9.5,arrowprops=dict(arrowstyle="->",color=INK))
+ax.annotate("Full value at 18 min\n(15 minutes of rest\nplus 3 of loading)",xy=(18,1),xytext=(18.6,.62),fontsize=9.5,arrowprops=dict(arrowstyle="->",color=INK))
 for mm,c,lab,off in [(11,GREEN,"11 min",(8,-16)),(13,BLUE,"13 min",(8,-16)),(23,ORANGE,"23 min",(-30,-22))]:
     ax.plot(mm,Lam(mm),"o",color=c,ms=8,zorder=5); ax.annotate(f"{lab}: Λ = {float(Lam(mm)):.3f}",xy=(mm,Lam(mm)),xytext=off,textcoords="offset points",fontsize=9.5,color=c)
 ax.set_xlim(0,25); ax.set_ylim(-.03,1.12); ax.set_xlabel("Layover length (minutes)"); ax.set_ylabel("Length factor Λ")
@@ -63,11 +63,16 @@ ax.set_title("Layover Gainfulness Index:  Γ = Λ × Π × 100",loc="left"); sav
 n,Sx,Sy,Sxy=200,292,100,-176.5; P=(n-Sy)/n; mu=(Sx-Sxy)/(n-Sy); Fm=Sxy/Sy; sc=mu/2
 fig,ax=plt.subplots(figsize=(8.5,4.3))
 x=np.linspace(0,20,500); dens=P*x/sc**2*np.exp(-x/sc); ax.fill_between(x,dens,color=ORANGE,alpha=.25); ax.plot(x,dens,color=ORANGE,lw=2.4)
-ax.vlines(Fm,0,.13,color=GREEN,lw=4); ax.plot(Fm,.13,"o",color=GREEN,ms=8)
-ax.annotate(f"Not late: {1-P:.0%} of days (point mass)\narrival shifted by F = −1.77 min",xy=(Fm,.13),xytext=(-5.6,.145),fontsize=9.5,color=GREEN)
+Sx2=3939; varN=(Sx2-(n-Sy)*1.5*mu**2)/Sy-Fm**2; sdN=varN**.5; kN=(Fm/sdN)**2; thN=sdN**2/abs(Fm)
+from math import gamma as Gf
+xe=np.linspace(-12,-0.1,400); de=(1-P)*(-xe)**(kN-1)*np.exp(xe/thN)/(Gf(kN)*thN**kN)
+ax.fill_between(xe,de,color=GREEN,alpha=.25); ax.plot(xe,de,color=GREEN,lw=2.4)
+ax.axvline(Fm,color=GREEN,ls="--",lw=1.6)
+ax.annotate(f"On time or early: {1-P:.0%} of days,\nestimated spread from Σx²\n(SD ≈ {sdN:.1f} min)",xy=(-3.6,(1-P)*3.6**(kN-1)*np.exp(-3.6/thN)/(Gf(kN)*thN**kN)),xytext=(-11.7,.24),fontsize=9.5,color=GREEN,arrowprops=dict(arrowstyle="->",color=GREEN))
+ax.annotate(f"The simulation uses their\naverage, F = −1.77 min,\nfor every non-late day",xy=(Fm,.14),xytext=(-11.7,.13),fontsize=9.5,color=GREEN,fontweight="bold",arrowprops=dict(arrowstyle="->",color=GREEN))
 ax.axvline(mu,color=ORANGE,ls="--",lw=1); ax.annotate(f"Late: {P:.0%} of days\ngamma, shape 2, mean μ = 4.69 min\nℓ = −(μ ÷ 2) × ln(r₁ × r₂)",xy=(mu,P*mu/sc**2*np.exp(-mu/sc)),xytext=(8.2,.075),fontsize=9.5,color=ORANGE,arrowprops=dict(arrowstyle="->",color=ORANGE))
-ax.axvline(0,color=INK,lw=.8); ax.set_xlim(-6,20); ax.set_ylim(0,.18)
-ax.set_xlabel("Arrival deviation (minutes; negative = early)"); ax.set_ylabel("Probability density, late arrivals")
+ax.axvline(0,color=INK,lw=.8); ax.set_xlim(-12,20); ax.set_ylim(0,.32)
+ax.set_xlabel("Arrival deviation (minutes; negative = early)"); ax.set_ylabel("Probability density")
 ax.set_title("Lateness Model, from n = 200, Σx = 292, Σy = 100, Σxy = −176.5",loc="left"); save(fig,"lateness_model")
 
 # 5 Simulated layover distribution, 17:19
@@ -77,7 +82,7 @@ u=np.maximum(0,U-l)*60; z=R*((T+(U+l/1)/2)/W-.5); g=Lam(u)*np.exp(-z*z/2)*100
 fig,ax=plt.subplots(figsize=(8.5,4.3))
 ax.hist(u[late],bins=np.arange(0,16.01,.5),color=ORANGE,alpha=.8,label="Late arrivals",weights=np.ones(late.sum())/N*100)
 ax.bar(13-Fm,(~late).mean()*100,width=.45,color=GREEN,label="Not late",align="center")
-ax.text(15.25,5.2,f"Not late: {(~late).mean():.0%} of days\nat {13-Fm:.1f} min (bar off scale)",fontsize=9,color=GREEN)
+ax.text(15.25,5.0,f"Not late: {(~late).mean():.0%} of days,\nall at {13-Fm:.1f} min using\nthe average F (bar off scale)",fontsize=9,color=GREEN)
 ax.axvspan(0,3,color=RED,alpha=.08); ax.text(1.5,4.4,f"Not usable\n≤ 3 min\n{(u<=3).mean():.1%} of days",ha="center",fontsize=9.5,color=RED)
 ax.axvline(13,color=INK,ls="--",lw=1); ax.text(13.15,4.0,"Scheduled\n13 min",fontsize=9)
 ax.axvline(u.mean(),color=BLUE,lw=1.5); ax.text(u.mean()-.15,5.2,f"Average\n{u.mean():.1f} min",ha="right",fontsize=9,color=BLUE,bbox=dict(fc="white",ec="none",pad=1))
