@@ -1,3 +1,5 @@
+![Social Media Preview](assets/layover32_social_preview.png)
+
 # LAYOVER Statefile
 
 ## CONTENTS
@@ -51,12 +53,14 @@ This program is an independent analysis tool. It is not produced, endorsed, or u
 
 ### 3.1 Layover Gainfulness Index
 
-The index rates a layover on two factors, multiplied together:
+The index scores a layover against a **minimum benchmark: one continuous 15-minute rest at mid-shift**. The benchmark is a floor, not an ideal.
 
-- **Length factor (Λ):** a layover must be long enough to rest. The first 3 minutes count for nothing, and full value is reached at 18 minutes.
+The index rates a layover on two factors, multiplied together, because the benchmark requires both:
+
+- **Length factor (Λ):** the proportion of the 15-minute benchmark rest the layover delivers. The bus must be at the departure position and boarding 3 minutes before departure (the boarding allowance), so those minutes are not rest. A layover must be longer than 3 minutes to give any rest, and full value is reached at 18 minutes: 15 minutes of rest plus 3 of boarding.
 - **Placement factor (Π):** a break near the middle of the shift is worth more than one near the start or end. The factor follows a normal curve centred on mid-shift, with one standard deviation equal to one round trip.
 
-A score of 100 is a layover of at least 18 minutes centred exactly on mid-shift.
+A score of 100 means the layover meets the benchmark: at least 18 minutes, centred on mid-shift.
 
 The chart below maps the index across every combination of layover length and position for the example shift in section 7 (08:00 to 16:00, 5 round trips). Three layovers are marked: the two from the examples and an 11-minute break at mid-shift. A long break early in the shift scores lower than a shorter one near the middle.
 
@@ -88,13 +92,15 @@ Where z is the Placement Z-Score: the number of round trips the layover midpoint
 
 Each round trip on either side of mid-shift is one standard deviation. A layover centred one round trip from mid-shift keeps 61% of its value; at two round trips it keeps 14%.
 
+A round trip is measured start to start: from a departure at a terminal to the next departure from the same terminal, including running time in both directions, layover and recovery time, and any deadhead bundled into the cycle. R is therefore the shift length divided by the average cycle time, and need not be a whole number.
+
 #### Length Factor
 
 ```
 Λ = 4u − 0.2,   maximum 1
 ```
 
-With u in hours, this is (minutes − 3) ÷ 15.
+With u in hours, this is (minutes − 3) ÷ 15. The 3 minutes subtracted are the boarding allowance at the end of the layover, when the bus must be at the departure position and boarding; the 15 is the rest needed for full value.
 
 ![Length factor](assets/length_factor.svg)
 
@@ -123,7 +129,7 @@ Because Y is 1 only for trips that were not late, Σxy is the sum of the deviati
 
 LBL R displays these same values in minutes, with the on-time-or-early share 1 − P shown as ȳ × 100, so a dataset can be checked before it is simulated.
 
-The chart shows the model the simulation builds from the dataset used in section 7.3. Half of all arrivals fall at a single point, 1.77 minutes early; the other half spread across a gamma curve averaging 4.69 minutes late.
+The chart shows the model the simulation builds from the dataset used in section 7.3. Late arrivals, half of the dataset, are spread across a gamma curve averaging 4.69 minutes late. The other half arrived on time or early, and they vary too: the green curve is their spread estimated from Σx², with a standard deviation of about 1.8 minutes. The simulation does not draw from that spread. It uses their average, F = −1.77 minutes, for every day the trip is not late.
 
 ![Lateness model](assets/lateness_model.svg)
 
@@ -140,9 +146,11 @@ Each simulated day, a random number decides whether the incoming trip is late:
   where r₁ and r₂ are random numbers. Delays are mostly moderate, occasionally long, and never negative.
 - **Not late:** the arrival is shifted by the average early deviation F.
 
+Using the average for every non-late day is a simplification with little effect on the results. An early arrival only lengthens the layover, so it never makes a break unusable, and the average early deviation is preserved exactly. For the layover in section 7.3, drawing early arrivals from their estimated spread instead lowers the expected score by about 0.3 points and leaves the usable share and average layover unchanged.
+
 The actual layover is u = U − ℓ (not less than 0), and the actual midpoint is T + (U + ℓ) ÷ 2. The day is scored with the same index as the paper score, and the length factor is held between 0 and 1. A day is counted as usable when its score is greater than zero, that is, when the actual layover exceeds 3 minutes.
 
-The chart shows the actual layover received over 200,000 simulated days for the 12:51–13:04 layover in section 7.3. On days the trip is not late, the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
+The chart shows the actual layover received over 200,000 simulated days for the 12:51–13:04 layover in section 7.3. On days the trip is not late, the simulation uses the average early deviation, so the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
 
 ![Simulated layover](assets/simulated_layover.svg)
 
@@ -372,7 +380,7 @@ Press: `XEQ L`
 
 **Interpretation:**
 
-The 13-minute layover earns a length factor of 0.667. Its midpoint is 0.60 round trips after mid-shift, for a placement factor of 0.836. On paper, the layover is worth 55.7% of an ideal break.
+The 13-minute layover earns a length factor of 0.667. Its midpoint is 0.60 round trips after mid-shift, for a placement factor of 0.836. On paper, the layover delivers 55.7% of the minimum benchmark.
 
 ### 7.2 Early Layover
 
@@ -485,7 +493,7 @@ Half of the 200 recorded arrivals were on time or early. Late arrivals averaged 
 - Use `SEED` before running to repeat a simulation exactly
 - LBL L does not limit the length factor at zero, so a scheduled layover shorter than 3 minutes produces a negative paper score; the simulation limits it at zero
 - LBL H rounds with RND, which follows the display setting; FIX 6 removes conversion error without changing the result
-- The simulation assumes the operator departs at the scheduled time, so it measures what the schedule provides
+- The simulation assumes the operator departs at the scheduled time: a late arrival reduces the layover by the full delay, and in the worst case the layover is lost entirely. The index therefore measures the rest the schedule delivers while service runs to time
 - Days are simulated independently; runs of bad days caused by weather or roadworks are not modelled
 - Global registers are not saved in a Statefile and are lost on RESET or firmware update
 - Label R and variable R (round trips) are separate on the DM32 and do not interact
@@ -799,6 +807,7 @@ R17  RTN
 ### By jacober-calc for SwissMicros DM32
 
 > - [SwissMicros Website](https://www.swissmicros.com)
-> - [DM32 product page](https://www.swissmicros.com/product/model-dm32)
-> - [SwissMicros full products page](https://www.swissmicros.com/products)
+> - [DM32 product page](https://www.swissmicros.com/en/products/dm32)
+> - [SwissMicros full products page](https://www.swissmicros.com/en/shop)
 > - [DM32 Online User Manual](https://technical.swissmicros.com/dm32/doc/dm32_user_manual.html)
+> - [SwissMicros Calculator Forum](https://forum.swissmicros.com/index.php)
