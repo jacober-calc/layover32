@@ -72,13 +72,28 @@ All times are converted to decimal hours.
 
 #### Shift and Layover Times
 
+Shift length:
+
 $$
-\begin{aligned}
-W &= E - S && \text{shift length} \\
-U &= B - A && \text{scheduled layover} \\
-T &= A - S && \text{shift start to layover arrival} \\
-M &= T + \frac{U}{2} && \text{shift start to layover midpoint}
-\end{aligned}
+W = E - S
+$$
+
+Scheduled layover:
+
+$$
+U = B - A
+$$
+
+Shift start to layover arrival:
+
+$$
+T = A - S
+$$
+
+Shift start to layover midpoint:
+
+$$
+M = T + \frac{U}{2}
 $$
 
 #### Placement Factor
@@ -120,12 +135,22 @@ The Monte Carlo simulation reads the lateness of the trip arriving at the layove
 
 From the summation registers, the program calculates:
 
+Chance of a late arrival:
+
 $$
-\begin{aligned}
-P &= \frac{n-\sum y}{n} && \text{chance of a late arrival} \\
-\mu &= \frac{\sum x-\sum xy}{n-\sum y} && \text{average lateness when late, minutes} \\
-F &= \frac{\sum xy}{\sum y} && \text{average deviation when not late, minutes}
-\end{aligned}
+P = \frac{n - \Sigma y}{n}
+$$
+
+Average lateness when late, in minutes:
+
+$$
+\mu = \frac{\Sigma x - \Sigma xy}{n - \Sigma y}
+$$
+
+Average deviation when not late, in minutes:
+
+$$
+F = \frac{\Sigma xy}{\Sigma y}
 $$
 
 Because Y is 1 only for trips that were not late, Σxy is the sum of the deviations of those trips, and Σx − Σxy is the sum of the late minutes.
