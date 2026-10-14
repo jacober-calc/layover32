@@ -55,7 +55,7 @@ This program is an independent analysis tool. It is not produced, endorsed, or u
 
 The index rates a layover on two factors, multiplied together:
 
-- **Length factor (Λ):** a layover must be long enough to rest. The first 3 minutes count for nothing, and full value is reached at 18 minutes.
+- **Length factor (Λ):** a layover must be long enough to rest. Its last 3 minutes are taken up loading passengers before departure, so a layover must be longer than 3 minutes to give any rest. Full value is reached at 18 minutes: 15 minutes of rest plus 3 of loading.
 - **Placement factor (Π):** a break near the middle of the shift is worth more than one near the start or end. The factor follows a normal curve centred on mid-shift, with one standard deviation equal to one round trip.
 
 A score of 100 is a layover of at least 18 minutes centred exactly on mid-shift.
@@ -96,7 +96,7 @@ Each round trip on either side of mid-shift is one standard deviation. A layover
 Λ = 4u − 0.2,   maximum 1
 ```
 
-With u in hours, this is (minutes − 3) ÷ 15.
+With u in hours, this is (minutes − 3) ÷ 15. The 3 minutes subtracted are the loading time at the end of the layover, before the bus departs; the 15 is the rest needed for full value.
 
 ![Length factor](assets/length_factor.svg)
 
@@ -125,7 +125,7 @@ Because Y is 1 only for trips that were not late, Σxy is the sum of the deviati
 
 LBL R displays these same values in minutes, with the on-time-or-early share 1 − P shown as ȳ × 100, so a dataset can be checked before it is simulated.
 
-The chart shows the model the simulation builds from the dataset used in section 7.3. Half of all arrivals fall at a single point, 1.77 minutes early; the other half spread across a gamma curve averaging 4.69 minutes late.
+The chart shows the model the simulation builds from the dataset used in section 7.3. Late arrivals, half of the dataset, are spread across a gamma curve averaging 4.69 minutes late. The other half arrived on time or early, and they vary too: the green curve is their spread estimated from Σx², with a standard deviation of about 1.8 minutes. The simulation does not draw from that spread. It uses their average, F = −1.77 minutes, for every day the trip is not late.
 
 ![Lateness model](assets/lateness_model.svg)
 
@@ -142,9 +142,11 @@ Each simulated day, a random number decides whether the incoming trip is late:
   where r₁ and r₂ are random numbers. Delays are mostly moderate, occasionally long, and never negative.
 - **Not late:** the arrival is shifted by the average early deviation F.
 
+Using the average for every non-late day is a simplification with little effect on the results. An early arrival only lengthens the layover, so it never makes a break unusable, and the average early deviation is preserved exactly. For the layover in section 7.3, drawing early arrivals from their estimated spread instead lowers the expected score by about 0.3 points and leaves the usable share and average layover unchanged.
+
 The actual layover is u = U − ℓ (not less than 0), and the actual midpoint is T + (U + ℓ) ÷ 2. The day is scored with the same index as the paper score, and the length factor is held between 0 and 1. A day is counted as usable when its score is greater than zero, that is, when the actual layover exceeds 3 minutes.
 
-The chart shows the actual layover received over 200,000 simulated days for the 12:51–13:04 layover in section 7.3. On days the trip is not late, the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
+The chart shows the actual layover received over 200,000 simulated days for the 12:51–13:04 layover in section 7.3. On days the trip is not late, the simulation uses the average early deviation, so the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
 
 ![Simulated layover](assets/simulated_layover.svg)
 
