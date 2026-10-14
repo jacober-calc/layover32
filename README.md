@@ -72,19 +72,20 @@ All times are converted to decimal hours.
 
 #### Shift and Layover Times
 
-```
-W = E − S          Shift length
-U = B − A          Scheduled layover
-T = A − S          Shift start to layover arrival
-M = T + U ÷ 2      Shift start to layover midpoint
-```
+$$
+\begin{aligned}
+W &= E - S && \text{shift length} \\
+U &= B - A && \text{scheduled layover} \\
+T &= A - S && \text{shift start to layover arrival} \\
+M &= T + \frac{U}{2} && \text{shift start to layover midpoint}
+\end{aligned}
+$$
 
 #### Placement Factor
 
-```
-z = R × (M ÷ W − 0.5)
-Π = e^(−z² ÷ 2)
-```
+$$
+z = R\left(\frac{M}{W}-\frac{1}{2}\right), \qquad \Pi = e^{-z^{2}/2}
+$$
 
 Where z is the Placement Z-Score: the number of round trips the layover midpoint sits from mid-shift.
 
@@ -96,19 +97,19 @@ A round trip is measured start to start: from a departure at a terminal to the n
 
 #### Length Factor
 
-```
-Λ = 4u − 0.2,   maximum 1
-```
+$$
+\Lambda = \min\left(1,\ 4u - 0.2\right)
+$$
 
-With u in hours, this is (minutes − 3) ÷ 15. The 3 minutes subtracted are the boarding allowance at the end of the layover, when the bus must be at the departure position and boarding; the 15 is the rest needed for full value.
+With $u$ in hours, this is $(\text{minutes} - 3)/15$. The 3 minutes subtracted are the boarding allowance at the end of the layover, when the bus must be at the departure position and boarding; the 15 is the rest needed for full value.
 
 ![Length factor](assets/length_factor.svg)
 
 #### Score
 
-```
-Γ = Λ × Π × 100
-```
+$$
+\Gamma = 100\,\Lambda\,\Pi
+$$
 
 ### 3.3 Lateness Data
 
@@ -119,11 +120,13 @@ The Monte Carlo simulation reads the lateness of the trip arriving at the layove
 
 From the summation registers, the program calculates:
 
-```
-P = (n − Σy) ÷ n                  Chance of a late arrival
-μ = (Σx − Σxy) ÷ (n − Σy)         Average lateness when late, minutes
-F = Σxy ÷ Σy                      Average deviation when not late, minutes
-```
+$$
+\begin{aligned}
+P &= \frac{n-\sum y}{n} && \text{chance of a late arrival} \\
+\mu &= \frac{\sum x-\sum xy}{n-\sum y} && \text{average lateness when late, minutes} \\
+F &= \frac{\sum xy}{\sum y} && \text{average deviation when not late, minutes}
+\end{aligned}
+$$
 
 Because Y is 1 only for trips that were not late, Σxy is the sum of the deviations of those trips, and Σx − Σxy is the sum of the late minutes.
 
@@ -139,16 +142,16 @@ Each simulated day, a random number decides whether the incoming trip is late:
 
 - **Late (probability P):** lateness is drawn from a gamma distribution with shape 2 and mean μ:
 
-  ```
-  ℓ = −(μ ÷ 2) × ln(r₁ × r₂)
-  ```
+  $$
+  \ell = -\frac{\mu}{2}\,\ln\left(r_1 r_2\right)
+  $$
 
-  where r₁ and r₂ are random numbers. Delays are mostly moderate, occasionally long, and never negative.
+  where $r_1$ and $r_2$ are random numbers. Delays are mostly moderate, occasionally long, and never negative.
 - **Not late:** the arrival is shifted by the average early deviation F.
 
 Using the average for every non-late day is a simplification with little effect on the results. An early arrival only lengthens the layover, so it never makes a break unusable, and the average early deviation is preserved exactly. For the layover in section 7.3, drawing early arrivals from their estimated spread instead lowers the expected score by about 0.3 points and leaves the usable share and average layover unchanged.
 
-The actual layover is u = U − ℓ (not less than 0), and the actual midpoint is T + (U + ℓ) ÷ 2. The day is scored with the same index as the paper score, and the length factor is held between 0 and 1. A day is counted as usable when its score is greater than zero, that is, when the actual layover exceeds 3 minutes.
+The actual layover is $u = \max(0,\ U - \ell)$, and the actual midpoint is $T + (U + \ell)/2$. The day is scored with the same index as the paper score, and the length factor is held between 0 and 1. A day is counted as usable when its score is greater than zero, that is, when the actual layover exceeds 3 minutes.
 
 The chart shows the actual layover received over 200,000 simulated days for the 12:51–13:04 layover in section 7.3. On days the trip is not late, the simulation uses the average early deviation, so the layover is 14.8 minutes. On late days it is spread below the scheduled 13 minutes, and on 3.7% of days it is 3 minutes or less.
 
@@ -203,7 +206,7 @@ flowchart TD
 | **U** | Scheduled layover (hours) |
 | **T** | Shift start to layover arrival (hours) |
 | **P** | Chance of a late arrival |
-| **L** | Gamma scale, μ ÷ 2 (hours) |
+| **L** | Gamma scale, $\mu/2$ (hours) |
 | **F** | Average deviation when not late (hours; negative = early) |
 | **G** | Score total (internal use) |
 | **C** | Usable day count (internal use) |
